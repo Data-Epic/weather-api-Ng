@@ -19,22 +19,26 @@ def scrape_ng_weather():
             response.raise_for_status() # ensure request was successfull
 
             soup = BeautifulSoup(response.content, "lxml")
-
-            # Loacate weather states tbale 
-            table = soup.find("table", class_="zebra tb-wt tc sep")
-
-            # Extract the headers 
-            headers = [th.get_text(strip=True) for th in table.find_all("th")]
-
-            # Exxtract rows
-            rows = []
-            for tr in table.find_all('tr')[1:]:
-                columns = [td.get_text(strip=True) for td in tr.find_all("td")]
-            if columns:
-                row_data = dict(zip(headers, columns))
-                rows.append(row_data)
             
-            weather_ng_data[city] = rows
+            
+            # Extract relevant weather details
+            temperature = soup.find("div", class_="h2").text.strip() if soup.find("div", class_="h2") else "N/A"
+            humidity = soup.find("th", text="Humidity").find_next_sibling("td").text.strip() if soup.find("th", text="Humidity") else "N/A"
+            pressure = soup.find("th", text="Pressure").find_next_sibling("td").text.strip() if soup.find("th", text="Pressure") else "N/A"
+            dew_point = soup.find("th", text="Dew Point").find_next_sibling("td").text.strip() if soup.find("th", text="Dew Point") else "N/A"
+            visibility = soup.find("th", text="Visibility").find_next_sibling("td").text.strip() if soup.find("th", text="Visibility") else "N/A"
+            # wind = soup.find("th", text="Wind").find_next_sibling("td").text.strip() if soup.find("td", text="Wind") else "N/A"
+            
+            # Store the extracted data
+            weather_ng_data[city] = {
+                "Temperature": temperature,
+                "Humidity": humidity,
+                "Pressure": pressure,
+                "Dew Point": dew_point,
+                "Visibility": visibility,
+                # "Wind": wind
+            }
+
         
         return weather_ng_data
     except requests.exceptions.RequestException as e:
@@ -42,3 +46,5 @@ def scrape_ng_weather():
     except Exception as e:
         print(f"Unexpected error: {e}")
     return None
+
+print(scrape_ng_weather())

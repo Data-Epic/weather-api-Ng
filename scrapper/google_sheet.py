@@ -16,9 +16,12 @@ def write_to_sheet(weather_data):
         client = gspread.authorize(creds)
 
         print(" Connecting to Google Sheet")
-        weather_ng_sheet_id = "1vnoYdUsZQG3lFqWiSxuzNVB2UcY4ioA6DfjmGFmhAA4"
+
+        weather_ng_sheet_id = "1W3dLAmITlXTZXzFfatxBCm7nE3bdDBMoi2yg1oily08"
         sheet = client.open_by_key(weather_ng_sheet_id)
         worksheet = sheet.sheet1
+        worksheet.clear()
+
         print("Succesfully connected to Google Sheets")
 
         for city, data in weather_data.items():
@@ -28,14 +31,17 @@ def write_to_sheet(weather_data):
                 print(f"No data for {city}")
                 continue
 
-            headers = list(data[0].keys())
+            headers = ["City", "Temperature", "Humidity", "Pressure", "Dew Point", "Visibility"]
             worksheet.append_row([city])
             worksheet.append_row(headers)
 
-            for row in data:
-                worksheet.append_row(list(row.values()))
-            
+            row = [data["Temperature"], data["Humidity"], data["Pressure"], 
+                   data["Dew Point"], data["Visibility"]]
+            worksheet.append_row(row)
+
             print("Succesfully wrote all weather data to Google Sheeets")
+
+
     except gspread.exceptions.SpreadsheetNotFound:
         print("Error: Spreadsheet not found")
     except gspread.exceptions.APIError as api_error:
@@ -43,3 +49,5 @@ def write_to_sheet(weather_data):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
+
+print(write_to_sheet(scrape_ng_weather()))
